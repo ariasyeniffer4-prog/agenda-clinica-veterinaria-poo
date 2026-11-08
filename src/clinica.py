@@ -5,7 +5,9 @@ from .excepciones import PacienteNoRegistradoError
 
 class Clinica:
     def __init__(self, nombre):
-        self.__nombre = nombre
+        if not isinstance(nombre, str) or not nombre.strip():
+            raise ValueError("El nombre de la clínica es obligatorio.")
+        self.__nombre = nombre.strip()
         self.__pacientes = {}
         self.__citas = []
 
@@ -23,6 +25,7 @@ class Clinica:
 
     def programar_cita(self, paciente, veterinario, fecha_hora):
         from .modelos import Cita
+
         if self.buscar_paciente(paciente.identificador) is not paciente:
             raise PacienteNoRegistradoError(
                 f"El paciente {paciente.nombre} no está registrado en {self.nombre}."
