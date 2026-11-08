@@ -6,6 +6,13 @@ from datetime import datetime, timedelta
 from .excepciones import CitaOcupadaError, HorarioInvalidoError
 
 
+def _texto_requerido(valor, campo):
+    """Valida y normaliza un dato de texto obligatorio."""
+    if not isinstance(valor, str) or not valor.strip():
+        raise ValueError(f"{campo} es obligatorio y no puede estar vacío.")
+    return valor.strip()
+
+
 class HistoriaClinica:
     """Registro breve de observaciones asociadas a un paciente."""
 
@@ -13,9 +20,7 @@ class HistoriaClinica:
         self.__entradas = []
 
     def agregar_entrada(self, texto):
-        texto = texto.strip()
-        if not texto:
-            raise ValueError("La entrada de la historia no puede estar vacía.")
+        texto = _texto_requerido(texto, "La entrada de la historia")
         self.__entradas.append(texto)
 
     def consultar_entradas(self):
@@ -26,11 +31,9 @@ class Responsable:
     """Persona de contacto responsable de uno o varios pacientes."""
 
     def __init__(self, nombre, telefono):
-        self.__nombre = nombre.strip()
-        self.__telefono = telefono.strip()
+        self.__nombre = _texto_requerido(nombre, "El nombre del responsable")
+        self.__telefono = _texto_requerido(telefono, "El teléfono del responsable")
         self.__animales = []
-        if not self.__nombre or not self.__telefono:
-            raise ValueError("El responsable requiere nombre y teléfono.")
 
     @property
     def nombre(self):
@@ -52,12 +55,12 @@ class Animal(ABC):
     """Concepto general no instanciable de paciente animal."""
 
     def __init__(self, identificador, nombre, edad, responsable):
-        if not identificador or not nombre.strip():
-            raise ValueError("El paciente requiere identificador y nombre.")
-        if edad < 0:
-            raise ValueError("La edad no puede ser negativa.")
-        self.__identificador = identificador
-        self.__nombre = nombre.strip()
+        self.__identificador = _texto_requerido(identificador, "El identificador del paciente")
+        self.__nombre = _texto_requerido(nombre, "El nombre del paciente")
+        if not isinstance(edad, int) or isinstance(edad, bool) or edad < 0:
+            raise ValueError("La edad debe ser un número entero no negativo.")
+        if not isinstance(responsable, Responsable):
+            raise ValueError("El paciente requiere un responsable válido.")
         self.__edad = edad
         self.__responsable = responsable
         # El historial es una parte esencial del expediente de este paciente.
@@ -100,6 +103,7 @@ class Animal(ABC):
 
 class Perro(Animal):
     def __init__(self, identificador, nombre, edad, responsable, tamano):
+        tamano = _texto_requerido(tamano, "El tamaño del perro").lower()
         if tamano not in {"pequeño", "mediano", "grande"}:
             raise ValueError("El tamaño debe ser pequeño, mediano o grande.")
         super().__init__(identificador, nombre, edad, responsable)
@@ -118,8 +122,10 @@ class Perro(Animal):
 
 class Gato(Animal):
     def __init__(self, identificador, nombre, edad, responsable, vive_en_interior):
+        if not isinstance(vive_en_interior, bool):
+            raise ValueError("vive_en_interior debe ser True o False.")
         super().__init__(identificador, nombre, edad, responsable)
-        self.__vive_en_interior = bool(vive_en_interior)
+        self.__vive_en_interior = vive_en_interior
 
     @property
     def vive_en_interior(self):
@@ -135,10 +141,9 @@ class Gato(Animal):
 
 class Ave(Animal):
     def __init__(self, identificador, nombre, edad, responsable, tipo_ave):
-        if not tipo_ave.strip():
-            raise ValueError("Debe indicarse el tipo de ave.")
+        tipo_ave = _texto_requerido(tipo_ave, "El tipo de ave")
         super().__init__(identificador, nombre, edad, responsable)
-        self.__tipo_ave = tipo_ave.strip()
+        self.__tipo_ave = tipo_ave
 
     @property
     def tipo_ave(self):
@@ -155,9 +160,9 @@ class Veterinario:
     """Profesional y conjunto de citas asignadas."""
 
     def __init__(self, identificador, nombre, especialidad):
-        self.__identificador = identificador
-        self.__nombre = nombre.strip()
-        self.__especialidad = especialidad.strip()
+        self.__identificador = _texto_requerido(identificador, "El identificador del veterinario")
+        self.__nombre = _texto_requerido(nombre, "El nombre del veterinario")
+        self.__especialidad = _texto_requerido(especialidad, "La especialidad del veterinario")
         self.__citas = []
 
     @property
