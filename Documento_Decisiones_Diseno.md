@@ -3,78 +3,70 @@
 ## Portada
 
 **Proyecto:** Agenda de una clínica veterinaria  
-**Asignatura:** Programación I 
+**Asignatura:** Programación I  
 **Integrante:** Yeniffer Fernanda Arias Ordoñez  
 **Docente:** Natalia Marcela Castellanos Gomez  
-**Fecha de entrega:** 08/11/2026  
-**Repositorio:** `[agregar URL cuando esté creado o confirmado]`
+**Fecha:** 08/11/2026  
+**Repositorio público:** https://github.com/ariasyeniffer4-prog/agenda-clinica-veterinaria-poo  
+**Commit de documentación y punto de entrada:** ff53194 — https://github.com/ariasyeniffer4-prog/agenda-clinica-veterinaria-poo/commit/ff53194b4be827b68f15127c08ad6232db82898c
 
 ## Introducción
 
-Este documento explica el diseño de un programa de consola para organizar el registro de pacientes animales y la programación de citas en una clínica veterinaria. El alcance es deliberadamente acotado: registra animales y responsables, relaciona cada cita con un veterinario y permite guardar notas breves en el historial de cada paciente. No diagnostica, recomienda tratamientos ni conserva la información entre ejecuciones.
+Este documento explica las decisiones de una aplicación de consola para registrar pacientes animales y programar citas en una clínica veterinaria. El sistema relaciona cada animal con una persona responsable, permite asignar citas a veterinarios y conserva notas breves en el historial de cada paciente. No diagnostica, recomienda tratamientos, factura ni conserva datos entre ejecuciones.
 
-La clínica veterinaria fue elegida por Yeniffer después de descartar el contexto de gestión académica trabajado previamente. El sistema ofrece un escenario concreto para explicar abstracción, herencia, encapsulamiento, polimorfismo, composición y excepciones propias del dominio.
+La clínica veterinaria se eligió después de identificar que el proyecto previo de Yeniffer ya abordaba gestión académica, contexto excluido por la actividad. El problema se delimitó a la agenda de pacientes, citas e historial breve para practicar los conceptos de programación orientada a objetos en Python.
 
-## Descripción general
+## Descripción de la solución
 
-El punto de entrada es `main.py`. Allí se crean datos de demostración, se registran pacientes en una instancia de `Clinica`, se recorre una colección heterogénea y se muestran resultados normales y excepcionales. Las entidades se encuentran en `src/modelos.py`, el servicio que coordina registros y programación está en `src/clinica.py`, y las excepciones se definen en `src/excepciones.py`.
-
-La agenda asigna una duración ilustrativa a cada paciente según datos de su tipo. Estos minutos y el horario de 08:00 a 18:00 son supuestos de demostración, no reglas médicas ni políticas confirmadas de una clínica real.
+El archivo main.py crea los objetos de demostración y coordina los casos normales y excepcionales. El paquete src contiene los modelos, el servicio de clínica y las excepciones del dominio. La duración de atención y el horario de 08:00 a 18:00 son supuestos de demostración, no recomendaciones médicas ni políticas confirmadas de una clínica real.
 
 ## Decisiones de diseño
 
-### Responsabilidades de las clases
+### Clases y responsabilidades
 
-`Clinica` mantiene el registro de pacientes y coordina la creación de citas. `Responsable` almacena nombre y teléfono, y permite consultar sus animales. `Veterinario` representa al profesional y verifica que sus citas no se crucen. `Cita` mantiene la fecha, el estado, la duración y las referencias al paciente, al responsable y al veterinario. `HistoriaClinica` agrega y devuelve notas breves. Estas responsabilidades separan la información y las reglas que pertenecen a cada concepto.
+Animal es la clase abstracta que concentra identificador, nombre, edad, responsable e historial. Perro, Gato y Ave agregan información propia de cada tipo. Responsable guarda datos de contacto y sus animales. Veterinario representa al profesional y mantiene su agenda. Cita relaciona paciente, responsable, veterinario, fecha, duración y estado. HistoriaClinica administra notas breves. Clinica registra pacientes y coordina la programación.
 
-### Abstracción y herencia
+### Abstracción, herencia y sobrescritura
 
-`Animal` es abstracta porque expresa datos compartidos por los pacientes, pero no representa un tipo específico que el programa deba crear directamente. Declara `resumen()` y `duracion_atencion()` como operaciones abstractas: cada tipo concreto debe implementar su descripción y estimación.
+Animal hereda de ABC y declara resumen() y duracion_atencion() como operaciones abstractas. No se instancia directamente porque el sistema requiere el comportamiento concreto de uno de los tipos modelados. Perro, Gato y Ave son animales, así que heredan de la clase común y comparten sus datos y operaciones.
 
-`Perro`, `Gato` y `Ave` heredan de `Animal` porque cada uno es un animal. Comparten identificador, nombre, edad, responsable e historial. Cada clase hija agrega información propia: tamaño para `Perro`, entorno interior/exterior para `Gato` y tipo de ave para `Ave`. Las tres sobrescriben `resumen()` y `duracion_atencion()`. Por ejemplo, la duración del perro depende del tamaño, la del gato de su entorno declarado y la del ave de su tipo. Son valores didácticos para mostrar variación de comportamiento.
+Cada subtipo agrega un dato propio: tamaño del perro, entorno interior/exterior del gato y tipo de ave. Los tres sobrescriben resumen() y duracion_atencion(). La duración cambia con los datos de cada clase: tamaño para el perro, entorno para el gato y tipo de ave para el ave. Los minutos asignados solo sirven para mostrar variación de comportamiento.
 
 ### Polimorfismo
 
-En `main.py`, la lista `pacientes` contiene instancias de las tres clases concretas. Un único ciclo llama a `resumen()` y `duracion_atencion()` en cada elemento, sin condicionales que pregunten qué subtipo se está recorriendo. Python ejecuta la implementación correspondiente al objeto.
+En main.py, la lista pacientes contiene instancias de Perro, Gato y Ave. Un único ciclo llama a resumen() y duracion_atencion() para cada elemento sin condicionales que identifiquen su tipo. Cada objeto ejecuta su propia implementación.
 
 ### Relaciones y composición
 
-Un `Responsable` puede estar relacionado con varios animales. Cada `Cita` hace referencia a un paciente, a su responsable y a un veterinario; la clínica registra pacientes y citas, y cada veterinario administra sus citas.
-
-La composición se aplica entre `Animal` e `HistoriaClinica`: el constructor de `Animal` crea un historial propio y el paciente lo expone para agregar o consultar entradas. El historial forma parte del expediente del paciente dentro del alcance de este modelo. No se modela mediante herencia porque un historial no es un tipo de animal; es un objeto que el paciente contiene.
+Un Responsable se relaciona con uno o varios animales. Cada Cita relaciona un paciente con su responsable y un veterinario; la clínica y el profesional mantienen sus colecciones de citas. La composición se usa entre Animal e HistoriaClinica: cada paciente crea y contiene su propio historial como parte esencial de su expediente dentro de este alcance. No es herencia porque una historia clínica no es un tipo de animal; es un objeto que pertenece al paciente.
 
 ### Excepciones del dominio
 
-`PacienteNoRegistradoError` se lanza desde `Clinica.programar_cita()` cuando el animal no pertenece al registro de la clínica. `CitaOcupadaError` se lanza desde `Veterinario.agendar()` cuando el intervalo se cruza con otra cita de ese profesional. `HorarioInvalidoError` se lanza al construir `Cita` cuando su hora de inicio queda fuera del horario ilustrativo. `main.py` captura las tres excepciones e imprime mensajes, luego continúa con las siguientes demostraciones.
+PacienteNoRegistradoError se lanza desde Clinica.programar_cita() si el paciente no está registrado. CitaOcupadaError se lanza desde Veterinario.agendar() si el horario se cruza con otra cita del mismo profesional. HorarioInvalidoError se lanza al construir Cita cuando la duración no cabe dentro del horario ilustrativo. main.py captura estos tres errores, muestra mensajes y continúa con las siguientes demostraciones.
 
-## Cambios de diseño durante el desarrollo
+## Cambios durante el desarrollo
 
-La propuesta inicial consideró clínica veterinaria, control de equipaje en aeropuerto y citas de clínica. Se eligió la clínica veterinaria y se acotó el alcance a consola, registro de pacientes, citas e historial breve. Tras ejecutar la primera versión, la salida mostró «1 años» para un paciente de un año. Se añadió la propiedad común `edad_texto` en `Animal` y las tres subclases la usan en sus resúmenes para elegir «año» o «años». Esta corrección surgió de la revisión de salida durante el desarrollo asistido.
+Se consideraron varias ideas antes de elegir la clínica veterinaria; el control de equipaje y una agenda de citas genérica no fueron seleccionados. El alcance se concretó en un programa de consola con registro, citas e historial breve. La primera ejecución mostró “1 años” para un paciente de un año. Se añadió edad_texto en Animal y se modificaron los resúmenes de los tres subtipos para mostrar correctamente “año” o “años”. También se validó que la duración completa de la cita no exceda la hora de cierre.
 
-También se definieron duraciones de agenda por tipo de paciente y el horario de 08:00 a 18:00 como supuestos demostrativos. No representan políticas confirmadas de una clínica real ni recomendaciones médicas.
+## Uso de inteligencia artificial
 
-## Uso de herramientas de inteligencia artificial
+ChatGPT se utilizó para interpretar los criterios, comparar contextos, proponer el diseño, generar y ajustar el borrador de código, redactar el README y el diagrama UML, revisar la salida y ejecutar el programa. Se conservó la clínica veterinaria; se descartaron las otras ideas propuestas. La corrección singular/plural y la validación del final de la cita se incorporaron tras revisar el código y su salida. Yeniffer debe comprender, verificar y poder explicar el resultado antes de entregarlo.
 
-Se utilizó ChatGPT para interpretar los criterios de la actividad, proponer contextos, diseñar las entidades, generar y ajustar el borrador de código, redactar el README y el diagrama UML, y ejecutar la demostración. De las ideas propuestas se conservó la clínica veterinaria; las opciones de aeropuerto y agenda de citas genérica no se seleccionaron. El código inicial se ajustó para mostrar correctamente la edad en singular y para impedir que la duración de una cita exceda el horario de cierre.
+## Verificación
 
-La autora debe revisar, comprender y poder explicar el código antes de la entrega. La ejecución de esta versión por ChatGPT no sustituye la revisión personal de Yeniffer. En esta conversación no se confirmó todavía una explicación individual o sustentación del código.
-
-## Verificación del sistema
-
-ChatGPT ejecutó manualmente `main.py` tres veces en el entorno de trabajo con Python 3.12.14. Las ejecuciones iniciales permitieron detectar el plural «1 años»; después de corregirlo, la ejecución final terminó con código 0 y mostró «1 año». La salida incluyó dos citas aceptadas, un rechazo de paciente no registrado, un cruce de agenda, un horario inválido y el mensaje de finalización, lo que demuestra que el flujo continuó después de cada excepción.
-
-La revisión del código confirmó una colección de las tres subclases recorrida con un ciclo que llama a los mismos métodos, la composición del historial dentro de cada paciente y las tres excepciones lanzadas desde `Clinica.programar_cita()`, `Veterinario.agendar()` y el constructor de `Cita`, respectivamente. No se creó ni ejecutó una suite de pruebas automatizadas. Esta evidencia corresponde a la ejecución asistida en el entorno de ChatGPT; Yeniffer debe repetir la ejecución en su propio entorno y revisar el código antes de entregar.
+ChatGPT ejecutó main.py tres veces con Python 3.12.14 en el entorno de trabajo. Tras corregir el resumen de edad, la ejecución final terminó con código 0, mostró dos citas aceptadas y capturó los tres errores previstos: paciente no registrado, cruce de horario y hora fuera del horario de atención. El programa continuó hasta imprimir el mensaje final. La revisión del código confirmó el ciclo polimórfico y la composición del historial. No se ejecutó una suite automatizada. Esta evidencia corresponde a la ejecución asistida y no se presenta como ejecución personal de la autora.
 
 ## Conclusiones
 
-La versión implementada integra las clases del dominio en una demostración ejecutable: cada paciente especializado comparte una interfaz, mientras que la cita y la clínica coordinan relaciones y validaciones. La ejecución de referencia permitió corregir un detalle de presentación de edad y comprobar que los errores de dominio no detienen las demostraciones posteriores. Los minutos de agenda y el horario se mantienen como supuestos didácticos y deberían ajustarse si se usara información real de una clínica.
+La solución integra abstracción, herencia, encapsulamiento, polimorfismo, composición y excepciones en un ejemplo de agenda veterinaria acotado. La revisión de la salida permitió corregir el plural de la edad y comprobar que los errores controlados no detienen la demostración. Las duraciones y el horario son supuestos didácticos que requerirían validación si se adaptara el programa a una clínica real.
 
-**Borrador de reflexión individual para revisar antes de entregar:** «Al revisar este proyecto, relacioné la herencia con los tipos de pacientes que comparten datos, y el polimorfismo con el ciclo que llama a los mismos métodos para perros, gatos y aves. También observé que la composición sirve para representar el historial que pertenece a cada paciente. La corrección de “1 años” me mostró la importancia de revisar la salida del programa, además de su lógica. La solución es una base didáctica; antes de entregarla debo poder explicar cada clase y cada validación con mis propias palabras.»
+**Borrador de reflexión individual para validar:** Al revisar este proyecto, relacioné la herencia con los tipos de pacientes que comparten datos y el polimorfismo con el ciclo que llama a los mismos métodos para perros, gatos y aves. También observé que la composición representa el historial que pertenece a cada paciente. La corrección de “1 años” mostró la importancia de revisar la salida del programa además de su lógica. Antes de entregar, debo poder explicar cada clase y cada validación con mis propias palabras.
 
-Usar esta reflexión solo si coincide con lo que Yeniffer realmente comprendió al revisar y ejecutar el programa. Puede editarla para que describa con precisión su experiencia.
+Usar la reflexión anterior solo si representa la experiencia real de Yeniffer; puede editarse para describir con precisión su aprendizaje.
 
 ## Referencias y herramientas consultadas
 
-- Universidad de Manizales, **Actividad colaborativa N.º 3. Proyecto Final**, documento suministrado para la actividad.
-- Python Software Foundation, [documentación del módulo `abc` de Python 3.12](https://docs.python.org/3.12/library/abc.html), consultada para la clase base abstracta y `@abstractmethod`.
-- Python Software Foundation, [documentación del módulo `datetime` de Python 3.12](https://docs.python.org/3.12/library/datetime.html), consultada para fechas, horas y duración de citas.
+- Universidad de Manizales, Actividad colaborativa N.º 3. Proyecto Final, documento suministrado para la actividad.
+- Python Software Foundation, documentación oficial del módulo abc: https://docs.python.org/3.12/library/abc.html
+- Python Software Foundation, documentación oficial del módulo datetime: https://docs.python.org/3.12/library/datetime.html
+- ChatGPT, OpenAI, como apoyo para interpretar requisitos, proponer, programar, documentar y revisar la demostración.
