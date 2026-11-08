@@ -6,70 +6,68 @@
 **Asignatura:** Programación I  
 **Integrante:** Yeniffer Fernanda Arias Ordoñez  
 **Docente:** Natalia Marcela Castellanos Gomez  
-**Fecha de entrega:** 08/11/2026  
+**Fecha:** 08/11/2026  
 **Repositorio público:** https://github.com/ariasyeniffer4-prog/agenda-clinica-veterinaria-poo
 
 ## Introducción
 
-Este documento explica el diseño de mi programa de consola para organizar el registro de pacientes animales y la programación de citas en una clínica veterinaria. Su alcance es acotado: registra animales y responsables, relaciona cada cita con un veterinario y permite guardar notas breves en el historial de cada paciente. No diagnostica, recomienda tratamientos ni conserva información entre ejecuciones.
+Este documento explica el diseño de mi programa de consola para registrar pacientes animales y programar citas en una clínica veterinaria. El sistema relaciona cada animal con su responsable, permite asignar citas a veterinarios y conserva notas breves en el historial de cada paciente. No diagnostica, recomienda tratamientos ni guarda información entre ejecuciones.
 
-Elegí la clínica veterinaria después de descartar el contexto de gestión académica trabajado previamente. El sistema ofrece un escenario concreto para explicar abstracción, herencia, encapsulamiento, polimorfismo, composición y excepciones propias del dominio.
+En el módulo trabajé previamente el contexto de gestión académica. Elegí la clínica veterinaria, un contexto distinto y permitido por la guía, para practicar abstracción, herencia, encapsulamiento, polimorfismo, composición y excepciones del dominio.
 
 ## Descripción general
 
-El punto de entrada es main.py. Allí creo los datos de demostración, registro pacientes en una instancia de Clinica, recorro una colección heterogénea y presento casos normales y excepcionales. Las entidades están en src/modelos.py, el servicio que coordina registros y citas está en src/clinica.py y las excepciones se definen en src/excepciones.py.
+El punto de entrada es main.py. Allí creo datos de demostración, registro pacientes en Clinica, recorro una colección heterogénea y muestro casos normales y excepcionales. Las entidades están en src/modelos.py, el servicio está en src/clinica.py y las excepciones en src/excepciones.py.
 
-La agenda asigna una duración ilustrativa a cada paciente según datos de su tipo. Los minutos y el horario de 08:00 a 18:00 son supuestos de demostración, no reglas médicas ni políticas confirmadas de una clínica real.
+Las duraciones de agenda y el horario de 08:00 a 18:00 son supuestos didácticos, no reglas médicas ni políticas confirmadas de una clínica real.
 
 ## Decisiones de diseño
 
 ### Responsabilidades de las clases
 
-Clinica mantiene el registro de pacientes y coordina la creación de citas. Responsable almacena nombre y teléfono, y permite consultar sus animales. Veterinario representa al profesional y verifica que sus citas no se crucen. Cita mantiene la fecha, el estado, la duración y las referencias al paciente, al responsable y al veterinario. HistoriaClinica agrega y devuelve notas breves. Estas responsabilidades separan la información y las reglas que pertenecen a cada concepto.
+Clinica mantiene el registro de pacientes y coordina citas. Responsable almacena nombre y teléfono y permite consultar sus animales. Veterinario representa al profesional y verifica cruces de citas. Cita reúne fecha, estado, duración y referencias al paciente, responsable y veterinario. HistoriaClinica agrega y devuelve notas breves. Estas responsabilidades separan los datos y reglas de cada concepto.
 
 ### Abstracción y herencia
 
-Animal es abstracta porque expresa datos compartidos por los pacientes, pero no representa un tipo específico que el programa deba crear directamente. Declara resumen() y duracion_atencion() como operaciones abstractas: cada tipo concreto debe implementarlas.
+Animal es abstracta porque reúne datos comunes, pero no representa un tipo específico que el programa necesite crear directamente. Declara resumen() y duracion_atencion() como operaciones abstractas que cada subtipo concreto implementa.
 
-Perro, Gato y Ave heredan de Animal porque cada uno es un animal. Comparten identificador, nombre, edad, responsable e historial. Cada clase hija agrega información propia: tamaño para Perro, entorno interior/exterior para Gato y tipo de ave para Ave. Las tres sobrescriben resumen() y duracion_atencion(). La duración del perro depende del tamaño, la del gato de su entorno declarado y la del ave de su tipo. Son valores didácticos para mostrar variación de comportamiento.
+Perro, Gato y Ave heredan de Animal porque cada uno es un animal. Comparten identificador, nombre, edad, responsable e historial. Perro agrega tamaño; Gato, su entorno interior o exterior; Ave, su tipo. Las tres clases sobrescriben resumen() y duracion_atencion(). Las duraciones varían según el tamaño del perro, el entorno del gato y el tipo de ave; son valores didácticos.
 
 ### Polimorfismo
 
-En main.py, la lista pacientes contiene instancias de las tres clases concretas. Un único ciclo llama a resumen() y duracion_atencion() en cada elemento, sin condicionales que identifiquen el subtipo. Python ejecuta la implementación correspondiente al objeto.
+En main.py, la lista pacientes contiene instancias de las tres clases concretas. Un solo ciclo llama a resumen() y duracion_atencion() en cada elemento, sin condicionales que identifiquen el subtipo. Python ejecuta el método correspondiente al objeto.
 
 ### Relaciones y composición
 
-Un Responsable puede estar relacionado con varios animales. Cada Cita hace referencia a un paciente, a su responsable y a un veterinario; la clínica registra pacientes y citas, y cada veterinario administra sus citas.
+Un Responsable puede relacionarse con varios animales. Cada Cita referencia paciente, responsable y veterinario; Clinica registra pacientes y citas, y cada veterinario administra sus citas.
 
-La composición se aplica entre Animal e HistoriaClinica: el constructor de Animal crea un historial propio y el paciente lo expone para agregar o consultar entradas. El historial forma parte del expediente del paciente dentro del alcance del modelo. No uso herencia porque un historial no es un tipo de animal; es un objeto que el paciente contiene.
+La composición se aplica entre Animal e HistoriaClinica: el constructor del paciente crea su historial. Este objeto forma parte esencial del expediente en el alcance del sistema; no corresponde a herencia porque un historial no es un tipo de animal.
 
 ### Excepciones del dominio
 
-PacienteNoRegistradoError se lanza desde Clinica.programar_cita() cuando el animal no pertenece al registro de la clínica. CitaOcupadaError se lanza desde Veterinario.agendar() cuando el intervalo se cruza con otra cita del profesional. HorarioInvalidoError se lanza al construir Cita cuando su hora de inicio queda fuera del horario ilustrativo. En main.py capturo las tres excepciones, muestro mensajes y continúo con las siguientes demostraciones.
+PacienteNoRegistradoError se lanza desde Clinica.programar_cita() cuando el animal no está registrado. CitaOcupadaError se lanza desde Veterinario.agendar() si el intervalo se cruza con otra cita. HorarioInvalidoError se lanza al construir Cita si la hora queda fuera del horario ilustrativo. main.py captura las tres excepciones, muestra mensajes y continúa.
 
 ## Cambios de diseño durante el desarrollo
 
-Al inicio consideré una clínica veterinaria, el control de equipaje en aeropuerto y una agenda genérica de citas. Elegí la clínica veterinaria y limité el alcance a consola, registro de pacientes, citas e historial breve. Al revisar la primera salida encontré «1 años» para un paciente de un año. Añadí la propiedad común edad_texto en Animal para mostrar «año» o «años» correctamente en los resúmenes.
+Consideré una clínica veterinaria, el control de equipaje en aeropuerto y una agenda genérica de citas. Elegí la clínica y limité el alcance a consola, registro de pacientes, citas e historial breve. La primera salida mostró «1 años»; corregí la presentación de edad para mostrar «1 año».
 
-También definí duraciones de agenda por tipo de paciente y el horario de 08:00 a 18:00 como supuestos demostrativos. No representan políticas confirmadas de una clínica real ni recomendaciones médicas.
+Definí duraciones de agenda y horario de 08:00 a 18:00 como supuestos de demostración. Además, cambié Gato para que acepte únicamente True o False y añadí validaciones que rechazan campos de texto obligatorios vacíos.
 
 ## Uso de herramientas de inteligencia artificial
 
-Utilicé ChatGPT como apoyo para proponer y revisar borradores de código y documentación. Revisé y ajusté el resultado para esta actividad; debo comprender y poder explicar lo que entregue.
+Utilicé ChatGPT como apoyo para estructurar el código y la documentación. En Gato cambié la conversión automática de valores a booleanos por una validación que exige True o False; también añadí validaciones para rechazar datos obligatorios vacíos.
 
 ## Verificación del sistema
 
-main.py se ejecutó tres veces en el entorno de trabajo con Python 3.12.14. Las ejecuciones iniciales permitieron detectar el plural «1 años»; después de corregirlo, la ejecución final terminó con código 0 y mostró «1 año». La salida incluyó dos citas aceptadas, un rechazo de paciente no registrado, un cruce de agenda, un horario inválido y el mensaje de finalización; el flujo continuó después de cada excepción.
+La ejecución final de main.py terminó con código 0 usando Python 3.14.4. Mostró seis pacientes, dos citas aceptadas, los tres errores de dominio y el mensaje final, así que el programa continuó después de cada error. La salida completa está guardada en evidencias/ejecucion_programa.txt.
 
-Al revisar el código confirmé que la colección de las tres subclases se recorre con un ciclo que llama a los mismos métodos, que el historial se compone dentro de cada paciente y que las tres excepciones se lanzan desde los métodos responsables. No creé ni ejecuté una suite de pruebas automatizadas. Esta evidencia corresponde a una ejecución asistida; debo revisar el código y puedo repetir la ejecución en mi entorno antes de entregar.
+El comando solicitado py main.py no pudo iniciar el lanzador py.exe de WindowsApps en este entorno. Ejecuté el mismo archivo con la ruta absoluta de Python 3.14.4. También comprobé manualmente que Gato acepta booleanos reales y rechaza texto, enteros y None, y que los campos obligatorios de responsable, veterinario y clínica rechazan vacíos. No ejecuté una suite automatizada.
 
 ## Conclusiones
 
-La versión implementada integra las clases del dominio en una demostración ejecutable: cada paciente especializado comparte una interfaz, mientras que la cita y la clínica coordinan relaciones y validaciones. La ejecución de referencia permitió corregir un detalle de presentación de edad y comprobar que los errores de dominio no detienen las demostraciones posteriores. Los minutos de agenda y el horario se mantienen como supuestos didácticos que ajustaría si usara información real de una clínica.
+La agenda integra las clases del dominio en una demostración: los tipos de paciente comparten una interfaz y la cita y la clínica coordinan sus relaciones y validaciones.
 
-**Reflexión individual para revisar antes de entregar:** «Al revisar este proyecto, relacioné la herencia con los tipos de pacientes que comparten datos y el polimorfismo con el ciclo que llama a los mismos métodos para perros, gatos y aves. También observé que la composición representa el historial que pertenece a cada paciente. La corrección de “1 años” me mostró la importancia de revisar la salida del programa además de su lógica. Antes de entregar, debo poder explicar cada clase y validación con mis propias palabras.»
-
-Mantendré esta reflexión solo si coincide con lo que comprendí al revisar el programa; la ajustaré para describir mi experiencia real.
+Al desarrollar este sistema comprendí que Perro, Gato y Ave comparten datos y operaciones de Animal, pero cada tipo responde de manera propia en sus métodos. El ciclo único me permitió observar el polimorfismo en funcionamiento y entender cómo evita preguntar qué tipo de paciente se procesa.
 
 ## Referencias y herramientas consultadas
 
