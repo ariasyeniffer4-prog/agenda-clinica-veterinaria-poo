@@ -1,0 +1,41 @@
+EVIDENCIA DE EJECUCIÓN
+Fecha: 2026-11-08
+Carpeta del proyecto: outputs/proyecto_clinica_veterinaria
+
+Intento solicitado:
+Comando: py main.py
+Resultado: no fue posible iniciar el lanzador py.exe de WindowsApps en este entorno.
+Mensaje observado al intentar desde cmd.exe: El sistema no puede ejecutar el programa especificado.
+
+Ejecución alternativa del mismo archivo principal:
+Comando: C:\Users\Yeni\AppData\Local\Python\bin\python.exe main.py
+Versión: Python 3.14.4
+Código de salida: 0
+
+Salida:
+Agenda de Clínica Huellas y Alas
+Pacientes y estimaciones (una colección, un ciclo, mismas operaciones):
+- Perro: Luna, 4 años, tamaño pequeño. Atención estimada: 30 min.
+- Gato: Nube, 2 años, vive en interior. Atención estimada: 30 min.
+- Ave (loro): Paco, 5 años. Atención estimada: 35 min.
+- Perro: Toby, 7 años, tamaño grande. Atención estimada: 50 min.
+- Gato: Mora, 1 año, vive en exterior. Atención estimada: 40 min.
+- Ave (periquito): Kiwi, 3 años. Atención estimada: 25 min.
+Entrada de historia: Consulta inicial; observación general registrada.
+
+Casos normales:
+Cita creada: 10/11/2026 09:00 | Luna | Dra./Dr. Camila Pérez | 30 min | pendiente
+Cita creada: 10/11/2026 10:00 | Nube | Dra./Dr. Camila Pérez | 30 min | pendiente
+
+Casos excepcionales (el programa continúa después de cada uno):
+No se pudo programar la cita: El paciente Michi no está registrado en Clínica Huellas y Alas.
+No se pudo programar la cita: Camila Pérez ya tiene una cita que se cruza con 10/11/2026 09:15.
+No se pudo programar la cita: La cita debe transcurrir dentro del horario de 08:00 a 18:00.
+
+Citas que quedaron registradas:
+- 10/11/2026 09:00 | Luna | Dra./Dr. Camila Pérez | 30 min | pendiente
+- 10/11/2026 10:00 | Nube | Dra./Dr. Camila Pérez | 30 min | pendiente
+Demostración finalizada.
+
+Validaciones manuales adicionales:
+Se comprobó que Gato acepta True y False, rechaza "False", 1 y None, y que los campos obligatorios de Responsable, Veterinario y Clinica rechazan valores vacíos. Resultado: correcto.
