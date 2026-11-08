@@ -1,10 +1,10 @@
 # Agenda de una clínica veterinaria
 
-Proyecto académico de consola para practicar programación orientada a objetos en Python. El sistema registra pacientes animales, responsables y veterinarios, programa citas con validaciones sencillas y permite consultar y agregar notas breves a la historia clínica.
+Proyecto académico de consola para practicar programación orientada a objetos en Python. El sistema registra pacientes animales, responsables y veterinarios, y programa citas con validaciones sencillas. También permite consultar y agregar notas breves a la historia clínica.
 
 ## Alcance
 
-Esta demostración no diagnostica, recomienda tratamientos, factura ni guarda datos al cerrar el programa. Los minutos asignados por tipo de paciente son valores didácticos para mostrar polimorfismo; no son recomendaciones clínicas. El horario ilustrativo es de 08:00 a 18:00.
+Esta demostración no diagnostica, recomienda tratamientos, factura ni guarda datos al cerrar el programa. Los minutos asignados por tipo de paciente son valores didácticos para mostrar comportamiento polimórfico; no son recomendaciones clínicas. El horario ilustrativo es de 08:00 a 18:00.
 
 ## Requisitos y ejecución
 
@@ -23,7 +23,7 @@ En Windows:
 py main.py
 ```
 
-El programa crea ejemplos, recorre una colección heterogénea de pacientes y presenta casos normales y excepcionales. La versión actual se ejecutó con Python 3.12.14 y terminó correctamente. En `Documento_Decisiones_Diseno.md` se describen los detalles de la verificación; debo revisar y comprender el código antes de entregarlo.
+Para ejecutarlo, use `py main.py` en Windows o `python main.py` en otros entornos.
 
 ## Estructura
 
@@ -33,6 +33,8 @@ proyecto_clinica_veterinaria/
 ├── README.md
 ├── Diagrama_UML.md
 ├── Documento_Decisiones_Diseno.md
+├── evidencias/
+│   └── ejecucion_programa.txt
 └── src/
     ├── __init__.py
     ├── clinica.py
@@ -42,33 +44,33 @@ proyecto_clinica_veterinaria/
 
 ## Clases y responsabilidades
 
-- `Animal` define la interfaz y los datos comunes de un paciente; es abstracta.
-- `Perro`, `Gato` y `Ave` especializan a `Animal` y sobrescriben `resumen()` y `duracion_atencion()`.
-- `Responsable` mantiene datos de contacto y la relación con sus animales.
-- `HistoriaClinica` administra entradas breves; cada animal contiene su propio historial.
-- `Veterinario` administra sus citas y detecta cruces de horario.
+- `Animal` define datos y operaciones comunes; es abstracta.
+- `Perro`, `Gato` y `Ave` heredan de `Animal` y sobrescriben `resumen()` y `duracion_atencion()`.
+- `Responsable` mantiene sus datos de contacto y animales asociados.
+- `HistoriaClinica` administra entradas breves; cada animal contiene su historial.
+- `Veterinario` administra citas y detecta cruces de horario.
 - `Cita` relaciona paciente, responsable y veterinario.
 - `Clinica` registra pacientes y coordina la programación.
 
 ## Excepciones del dominio
 
-- `PacienteNoRegistradoError`: se intenta citar un paciente que no está registrado.
+- `PacienteNoRegistradoError`: se intenta citar un paciente no registrado.
 - `CitaOcupadaError`: el intervalo se cruza con otra cita del veterinario.
-- `HorarioInvalidoError`: la cita empieza fuera del horario configurado.
+- `HorarioInvalidoError`: la cita queda fuera del horario configurado.
 
-El programa principal captura las excepciones y continúa con las demostraciones.
+El programa principal captura estas excepciones y continúa con las demostraciones.
 
 ## Verificación de referencia
 
-- Entorno de referencia: Python 3.12.14.
-- Resultado observado: ejecución final de `main.py` con código 0, dos citas aceptadas, tres errores de dominio capturados y mensaje final impreso.
-- Corrección tras la primera ejecución: el resumen de edad ahora presenta «1 año» en singular.
+- La ejecución final terminó con código 0, mostró dos citas aceptadas y capturó los tres errores de dominio, continuando hasta el mensaje final.
+- En el entorno de verificación, `py.exe` no pudo iniciar; el mismo programa se ejecutó con Python 3.14.4 mediante su ruta absoluta.
+- Se comprobaron manualmente la validación estricta de `Gato` y el rechazo de campos obligatorios vacíos.
+- La salida y las comprobaciones están en `evidencias/ejecucion_programa.txt`.
 
-## Repositorio y participación
+## Repositorio
 
-- URL del repositorio público: https://github.com/ariasyeniffer4-prog/agenda-clinica-veterinaria-poo
-- Commits relacionados con la actividad: disponibles en el historial del repositorio.
+https://github.com/ariasyeniffer4-prog/agenda-clinica-veterinaria-poo
 
 ## Uso de IA
 
-Utilicé ChatGPT como apoyo para proponer y revisar borradores de código y documentación. Revisé y ajusté el resultado para esta actividad; debo comprender y poder explicar lo que entregue.
+Utilicé ChatGPT para estructurar el código y la documentación; ajusté `Gato` para aceptar solo `True` y `False`, en lugar de convertir cualquier valor automáticamente.
